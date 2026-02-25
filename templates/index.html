@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧬 LifeCode AI — Biosensor Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-layer">
+    <div class="bg-blob b1"></div>
+    <div class="bg-blob b2"></div>
+    <div class="bg-blob b3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-icon">🧬</span>
+        <div>
+          <h1 class="brand-title">LifeCode AI</h1>
+          <p class="brand-sub">Dual-Mode Biosensing Platform</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Sensor Status Badge -->
+        <div class="sensor-badge" id="sensorBadge">
+          <span class="badge-dot" id="badgeDot"></span>
+          <span id="badgeText">● Virtual Mode</span>
+        </div>
+        <span class="user-chip">👤 {{ username }}</span>
+        <button class="btn-logout" onclick="logout()">⎋ Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    ⚠️ <strong>Educational Prototype Only</strong> — Not for medical diagnosis. Always consult a healthcare professional.
+  </div>
+
+  <!-- Live Sensor Bar (shown when physical mode active) -->
+  <div class="sensor-bar" id="sensorBar" style="display:none;">
+    <span>🔌 <strong>ESP32 Connected</strong></span>
+    <div class="sensor-bar-values">
+      <span>❤️ HR: <strong id="liveHR">--</strong> BPM</span>
+      <span>⚡ GSR: <strong id="liveGSR">--</strong> µS</span>
+      <span>🌡️ Temp: <strong id="liveTemp">--</strong> °C</span>
+      <span class="live-dot">● LIVE</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('virtual', this)">🧪 Virtual Biosensor</button>
+      <button class="tab-btn"        onclick="switchTab('camera',  this)">📷 Camera Biosensor</button>
+      <button class="tab-btn"        onclick="switchTab('sensor',  this)">🔌 ESP32 Sensor</button>
+    </div>
+
+    <!-- ── TAB 1: Virtual Biosensor ── -->
+    <div id="virtual-tab" class="tab-content active">
+      <div class="grid-2">
+
+        <!-- Lifestyle Inputs -->
+        <div class="card">
+          <h2 class="card-title">📊 Lifestyle Profile</h2>
+
+          <div class="form-group">
+            <label>💤 Sleep Hours/Night</label>
+            <input type="range" class="slider" id="sleep"    min="3"  max="12" step="0.5" value="7"   oninput="updateSlider('sleep',    'sleep-val',    v => v.toFixed(1)+' hrs')">
+            <div class="slider-val" id="sleep-val">7.0 hrs</div>
+          </div>
+
+          <div class="form-group">
+            <label>🍽️ Diet Quality</label>
+            <select class="select" id="food">
+              <option value="0">Poor</option>
+              <option value="1">Average</option>
+              <option value="2" selected>Good</option>
+              <option value="3">Excellent</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>🏃 Activity (hrs/week)</label>
+            <input type="range" class="slider" id="activity" min="0"  max="20" step="0.5" value="3"   oninput="updateSlider('activity', 'activity-val', v => v.toFixed(1)+' hrs')">
+            <div class="slider-val" id="activity-val">3.0 hrs</div>
+          </div>
+
+          <div class="form-group">
+            <label>😰 Stress Level (1–10)</label>
+            <input type="range" class="slider" id="stress"   min="1"  max="10" step="1"   value="5"   oninput="updateSlider('stress',   'stress-val',   v => v+'/10')">
+            <div class="slider-val" id="stress-val">5/10</div>
+          </div>
+
+          <div class="form-group">
+            <label>👴 Age</label>
+            <input type="range" class="slider" id="age"      min="18" max="80" step="1"   value="25"  oninput="updateSlider('age',      'age-val',      v => v+' yrs')">
+            <div class="slider-val" id="age-val">25 yrs</div>
+          </div>
+
+          <div class="form-group">
+            <label>⚖️ BMI</label>
+            <input type="range" class="slider" id="bmi"      min="15" max="40" step="0.1" value="22"  oninput="updateSlider('bmi',      'bmi-val',      v => parseFloat(v).toFixed(1))">
+            <div class="slider-val" id="bmi-val">22.0</div>
+          </div>
+        </div>
+
+        <!-- Medical Upload -->
+        <div class="card">
+          <h2 class="card-title">📄 Medical Report Upload</h2>
+
+          <div class="file-drop" id="fileDrop" onclick="document.getElementById('reportFile').click()">
+            <input type="file" id="reportFile" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadReport(event)" style="display:none">
+            <div class="file-drop-icon">📂</div>
+            <p>Click or drag a medical report here</p>
+            <small>PDF • JPG • PNG supported</small>
+          </div>
+
+          <div id="reportResult" style="display:none; margin-top:1.5rem;">
+            <p class="success-msg">✅ Report Parsed Successfully</p>
+            <div class="metrics-row">
+              <div class="mini-metric"><div class="mm-label">Glucose</div><div class="mm-val" id="d-glucose">95</div><div class="mm-unit">mg/dL</div></div>
+              <div class="mini-metric"><div class="mm-label">Cholesterol</div><div class="mm-val" id="d-chol">180</div><div class="mm-unit">mg/dL</div></div>
+              <div class="mini-metric"><div class="mm-label">Hemoglobin</div><div class="mm-val" id="d-hemo">13.5</div><div class="mm-unit">g/dL</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary full-width" onclick="analyzeVirtual()">
+        🔬 Analyze Health Profile with AI
+      </button>
+    </div>
+
+    <!-- ── TAB 2: Camera Biosensor ── -->
+    <div id="camera-tab" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="card-title">📷 Camera Heart Rate</h2>
+          <div class="camera-box">
+            <div class="camera-icon">💓</div>
+            <p>Webcam PPG Heart Rate Detection</p>
+            <small>Detects pulse from facial skin color changes</small>
+          </div>
+          <button class="btn-primary" style="margin-top:1.5rem;" onclick="startCamera()">
+            🎥 Start Camera Scan
+          </button>
+          <div id="cameraResult" style="display:none; margin-top:1.5rem; text-align:center;">
+            <p class="success-msg">✅ Heart Rate Detected</p>
+            <div class="big-metric" id="cameraHR">72</div>
+            <div style="color:var(--text-secondary);">BPM</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">📊 Additional Data</h2>
+          <div class="form-group">
+            <label>💤 Sleep (hrs)</label>
+            <input type="range" class="slider" id="sleep2" min="3" max="12" step="0.5" value="7" oninput="updateSlider('sleep2','sleep2-val', v => v+'hrs')">
+            <div class="slider-val" id="sleep2-val">7hrs</div>
+          </div>
+          <div class="form-group">
+            <label>😰 Stress (1–10)</label>
+            <input type="range" class="slider" id="stress2" min="1" max="10" step="1" value="5" oninput="updateSlider('stress2','stress2-val', v => v+'/10')">
+            <div class="slider-val" id="stress2-val">5/10</div>
+          </div>
+          <div class="form-group">
+            <label>🏃 Activity (hrs/week)</label>
+            <input type="range" class="slider" id="activity2" min="0" max="20" step="0.5" value="3" oninput="updateSlider('activity2','activity2-val', v => v+'hrs')">
+            <div class="slider-val" id="activity2-val">3hrs</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary full-width" onclick="analyzeCamera()">
+        🔬 Analyze with Camera + AI
+      </button>
+    </div>
+
+    <!-- ── TAB 3: ESP32 Sensor ── -->
+    <div id="sensor-tab" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="card-title">🔌 ESP32 Connection</h2>
+          <div id="sensorStatusCard">
+            <div class="sensor-status-big" id="sensorStatusBig">
+              <div class="status-icon">🔴</div>
+              <div class="status-text">No Hardware Detected</div>
+              <div class="status-sub">Connect ESP32 via USB cable</div>
+            </div>
+          </div>
+          <div class="info-box" style="margin-top:1.5rem;">
+            <strong>Expected Serial Format:</strong><br>
+            <code>82,540,36.4</code><br>
+            <small>heart_rate , gsr , temperature</small>
+          </div>
+          <button class="btn-secondary" onclick="refreshSensor()" style="margin-top:1rem;">
+            🔄 Refresh Status
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">📡 Live Sensor Readings</h2>
+          <div id="liveReadings">
+            <div class="sensor-metric-row">
+              <div class="sensor-metric">
+                <div class="sm-icon">❤️</div>
+                <div class="sm-label">Heart Rate</div>
+                <div class="sm-val" id="sm-hr">-- BPM</div>
+              </div>
+              <div class="sensor-metric">
+                <div class="sm-icon">⚡</div>
+                <div class="sm-label">GSR</div>
+                <div class="sm-val" id="sm-gsr">-- µS</div>
+              </div>
+              <div class="sensor-metric">
+                <div class="sm-icon">🌡️</div>
+                <div class="sm-label">Temperature</div>
+                <div class="sm-val" id="sm-temp">-- °C</div>
+              </div>
+            </div>
+            <div style="margin-top:1rem; color:var(--text-muted); font-size:0.85rem;" id="sensorTimestamp">
+              Last updated: --
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top:1.5rem;" onclick="analyzeWithSensor()">
+            🔬 Analyze with Sensor Data
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <h2 class="card-title">🛠️ ESP32 Arduino Code</h2>
+        <pre class="code-block"><code>// LifeCode AI — ESP32 Sensor Sender
+// Upload this to your ESP32 board
+
+#define PULSE_PIN  36    // Analog GPIO for Pulse Sensor
+#define GSR_PIN    39    // Analog GPIO for GSR Sensor
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  int   pulseRaw = analogRead(PULSE_PIN);
+  int   gsrRaw   = analogRead(GSR_PIN);
+
+  // Convert raw values
+  int   heartRate  = map(pulseRaw, 0, 4095, 50, 120);
+  float gsr        = gsrRaw / 100.0;
+  float temperature = 36.5 + random(-5, 10) / 100.0;
+
+  // Send CSV: heart_rate,gsr,temperature
+  Serial.print(heartRate);
+  Serial.print(",");
+  Serial.print(gsr, 1);
+  Serial.print(",");
+  Serial.println(temperature, 1);
+
+  delay(1000);  // Send every 1 second
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- ── Results Section ── -->
+    <div id="results" class="results-section">
+      <h2 class="section-title">📈 Health Analysis Results</h2>
+
+      <!-- Score Cards -->
+      <div class="score-row">
+        <div class="score-card">
+          <div class="sc-label">Stress Index</div>
+          <div class="sc-value" id="r-stress">--</div>
+          <div class="sc-badge" id="r-stress-badge">--</div>
+        </div>
+        <div class="score-card">
+          <div class="sc-label">Metabolic Score</div>
+          <div class="sc-value" id="r-metabolic">--</div>
+          <div class="sc-badge" id="r-metabolic-badge">--</div>
+        </div>
+        <div class="score-card">
+          <div class="sc-label">Lifestyle Risk</div>
+          <div class="sc-value" id="r-risk">--</div>
+          <div class="sc-badge" id="r-risk-badge">--</div>
+        </div>
+      </div>
+
+      <!-- Sensor Info Strip -->
+      <div class="sensor-strip" id="sensorStrip"></div>
+
+      <!-- AI Insights -->
+      <div class="ai-box">
+        <h3>🤖 AI Health Insights — Groq Llama-3.3-70b</h3>
+        <div id="aiContent">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Generating personalized insights...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>🧬 LifeCode AI v2.0 | Groq Llama-3.3-70b | ESP32 Sensor Integration</p>
+    <p>Educational prototype — not for clinical use</p>
+    <p class="footer-steven">Steven™</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
