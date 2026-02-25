@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LifeCode AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .welcome-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: white;
+        }
+
+        .steven-trademark {
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <h1>🧬 LifeCode AI</h1>
+            <div class="user-info">
+                <span class="user-name">Welcome, {{ user.name }}!</span>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+
+        <div class="welcome-card">
+            <h2>Welcome to LifeCode AI Dashboard</h2>
+            <p>Your AI-powered biosensing platform for comprehensive health analysis.</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Member since:</strong> {{ user.created_at.strftime('%B %d, %Y') }}</p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="feature-card">
+                <div class="icon">💉</div>
+                <h3>Virtual Biosensor</h3>
+                <p>Analyze your health metrics using machine learning based on your inputs (age, glucose, cholesterol, etc.)</p>
+                <a href="{{ url_for('index') }}" class="btn-primary">Launch Virtual Sensor</a>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">📷</div>
+                <h3>Camera Biosensor</h3>
+                <p>Use your webcam for real-time heart rate monitoring with advanced computer vision.</p>
+                <a href="{{ url_for('index') }}" class="btn-primary">Launch Camera Sensor</a>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">📝</div>
+                <h3>Report Parser</h3>
+                <p>Upload medical reports for OCR-based data extraction and automated analysis.</p>
+                <a href="{{ url_for('index') }}" class="btn-primary">Upload Report</a>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">🤖</div>
+                <h3>AI Insights</h3>
+                <p>Get personalized health recommendations powered by Groq AI's advanced language models.</p>
+                <a href="{{ url_for('index') }}" class="btn-primary">Get Insights</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Your health data is secure and encrypted</p>
+        <p class="steven-trademark">Made by Steven™</p>
+    </div>
+</body>
+</html>
